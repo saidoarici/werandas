@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}Teklif Detayları - {{ offer.customer.name }}{% endblock %}
+
+{% block head %}
+<style>
+    .compact-table th {
+        font-size: 0.9rem;
+        padding: 0.75rem 0.5rem;
+        white-space: nowrap;
+    }
+
+    .compact-table td {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .compact-table input {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 1400px) {
+        .compact-table th,
+        .compact-table td {
+            padding: 0.5rem 0.25rem;
+        }
+    }
+
+    .custom-card-body.p-0 {
+        overflow-x: auto;
+    }
+
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="page-title mb-0">Teklif Detayları</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('list_offers') }}">Teklifler</a></li>
+                    <li class="breadcrumb-item active">Teklif #{{ offer.id }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary me-2" onclick="history.back()">
+                <i class="fas fa-arrow-left me-2"></i>Geri
+            </button>
+            <a href="/offer/{{ offer.id }}/pdf" class="btn btn-danger">
+                <i class="fas fa-file-pdf me-2"></i>PDF İndir
+            </a>
+        </div>
+    </div>
+
+    <!-- Customer Info - Full Width -->
+    <div class="row g-4">
+        <div class="col-lg-12">
+            <div class="custom-card">
+                <div class="custom-card-header">
+                    <h5 class="mb-0 d-flex align-items-center">
+                        <i class="fas fa-user-circle me-2 text-primary"></i>
+                        Müşteri Bilgileri
+                    </h5>
+                </div>
+                <div class="custom-card-body">
+                    <div class="row g-4">
+                        <div class="col-md-3">
+                            <div class="customer-info-item">
+                                <label class="fw-semibold text-muted d-block mb-1">Müşteri Adı</label>
+                                <p class="mb-0 d-flex align-items-center">
+                                    <i class="fas fa-building me-2 text-secondary"></i>
+                                    {{ offer.customer.name }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="customer-info-item">
+                                <label class="fw-semibold text-muted d-block mb-1">Telefon</label>
+                                <p class="mb-0 d-flex align-items-center">
+                                    <i class="fas fa-phone me-2 text-secondary"></i>
+                                    {{ offer.customer.phone }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="customer-info-item">
+                                <label class="fw-semibold text-muted d-block mb-1">Geçerlilik Tarihi</label>
+                                <p class="mb-0 d-flex align-items-center">
+                                    <i class="fas fa-calendar-alt me-2 text-secondary"></i>
+                                    {{ offer.valid_until.strftime('%d.%m.%Y') }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="customer-info-item">
+                                <label class="fw-semibold text-muted d-block mb-1">Adres</label>
+                                <p class="mb-0 d-flex align-items-start">
+                                    <i class="fas fa-map-marker-alt me-2 text-secondary mt-1"></i>
+                                    <span>{{ offer.customer.address }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Section -->
+    <div class="row g-4 mt-0">
+        <div class="col-lg-12">
+            <div class="custom-card">
+                <div class="custom-card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 d-flex align-items-center">
+                        <i class="fas fa-box me-2 text-primary"></i>
+                        Teklif Ürünleri
+                    </h5>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addRow()">
+                        <i class="fas fa-plus me-2"></i>Satır Ekle
+                    </button>
+                </div>
+                <div class="custom-card-body p-0">
+                    <form id="itemForm">
+                        <div class="table-responsive" style="min-width: 1000px;">
+                            <table class="table compact-table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th width="40" style="min-width: 40px;">#</th>
+                                        <th width="300" style="min-width: 300px;">Ürün</th>
+                                        <th width="100" style="min-width: 100px;">Ölçü</th>
+                                        <th width="80" style="min-width: 80px;">Adet</th>
+                                        <th width="120" style="min-width: 120px;">Birim Maliyet</th>
+                                        <th width="120" style="min-width: 120px;">Montaj</th>
+                                        <th width="120" style="min-width: 120px;">Toplam</th>
+                                        <th width="80" style="min-width: 80px;">Kâr %</th>
+                                        <th width="120" style="min-width: 120px;">Karlı Satış</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemRows">
+                                    <!-- Dinamik ürün satırları -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-secondary">
+                                        <td colspan="6" class="text-end fw-bold">Toplam:</td>
+                                        <td id="totalCost" class="fw-bold">0</td>
+                                        <td></td>
+                                        <td id="totalSales" class="fw-bold">0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <div class="p-3 text-end border-top">
+                            <button type="button" class="btn btn-success px-4" onclick="saveItems()">
+                                <i class="fas fa-save me-2"></i>Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let rowCount = 0;
+
+    function addRow() {
+        rowCount++;
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td class="text-center text-secondary fw-bold">${rowCount}</td>
+            <td class="position-relative">
+                <input type="text" class="form-control form-control-sm product-search" name="product"
+                       placeholder="Ürün ara..." autocomplete="off" style="font-size: 0.9rem;">
+                <div class="list-group position-absolute w-100 shadow-sm" style="z-index: 999;"></div>
+            </td>
+            <td><input type="text" class="form-control form-control-sm" name="size" placeholder="Ölçü" style="font-size: 0.9rem;"></td>
+            <td><input type="number" class="form-control form-control-sm" name="quantity" value="1"
+                       onchange="calculate()" min="1" style="font-size: 0.9rem;"></td>
+            <td><input type="number" class="form-control form-control-sm" name="unit_cost" value="0"
+                       onchange="calculate()" step="0.01" min="0" style="font-size: 0.9rem;"></td>
+            <td><input type="number" class="form-control form-control-sm" name="assembly_cost" value="0"
+                       onchange="calculate()" step="0.01" min="0" style="font-size: 0.9rem;"></td>
+            <td class="total_cost fw-bold">0</td>
+            <td><input type="number" class="form-control form-control-sm" name="profit_rate" value="20"
+                       onchange="calculate()" min="0" style="font-size: 0.9rem;"></td>
+            <td class="sale_price fw-bold">0</td>
+        `;
+        document.getElementById("itemRows").appendChild(row);
+        setupSearch(row.querySelector(".product-search"));
+        calculate();
+    }
+
+    function setupSearch(input) {
+        const container = input.parentElement.querySelector(".list-group");
+
+        input.addEventListener("input", function () {
+            const query = input.value.trim();
+            if (query.length < 2) {
+                container.innerHTML = "";
+                return;
+            }
+
+            fetch(`/api/products?q=${query}`)
+                .then(res => res.json())
+                .then(data => {
+                    container.innerHTML = "";
+
+                    if (data.length === 0) {
+                        const item = document.createElement("div");
+                        item.className = "list-group-item text-muted";
+                        item.textContent = "Sonuç bulunamadı";
+                        container.appendChild(item);
+                        return;
+                    }
+
+                    data.forEach(product => {
+                        const item = document.createElement("button");
+                        item.className = "list-group-item list-group-item-action";
+                        item.type = "button";
+
+                        const content = document.createElement("div");
+                        const nameDiv = document.createElement("div");
+                        nameDiv.className = "fw-semibold";
+                        nameDiv.textContent = product.name;
+
+                        const infoDiv = document.createElement("div");
+                        infoDiv.className = "text-muted small mt-1";
+                        infoDiv.textContent = `Ölçü: ${product.size} | Maliyet: ₺${product.unit_cost}`;
+
+                        content.appendChild(nameDiv);
+                        content.appendChild(infoDiv);
+                        item.appendChild(content);
+
+                        item.onclick = () => {
+                            input.value = product.name;
+                            const row = input.closest("tr");
+                            row.querySelector('[name="size"]').value = product.size;
+                            row.querySelector('[name="unit_cost"]').value = product.unit_cost;
+                            row.querySelector('[name="assembly_cost"]').value = product.assembly_cost;
+                            container.innerHTML = "";
+                            calculate();
+                        };
+                        container.appendChild(item);
+                    });
+                })
+                .catch(error => {
+                    console.error('Hata:', error);
+                    container.innerHTML = '<div class="list-group-item text-danger">Hata oluştu</div>';
+                });
+        });
+
+        // Sayfa dışına tıklandığında önerileri kapat
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !container.contains(e.target)) {
+                container.innerHTML = '';
+            }
+        });
+    }
+
+    function calculate() {
+        let totalCost = 0, totalSales = 0;
+
+        document.querySelectorAll("#itemRows tr").forEach(row => {
+            const adet = parseFloat(row.querySelector('[name="quantity"]').value) || 0;
+            const a = parseFloat(row.querySelector('[name="unit_cost"]').value) || 0;
+            const b = parseFloat(row.querySelector('[name="assembly_cost"]').value) || 0;
+            const k = parseFloat(row.querySelector('[name="profit_rate"]').value) || 0;
+
+            const cost = (a + b) * adet;
+            const sale = cost * (1 + k / 100);
+
+            row.querySelector(".total_cost").textContent = cost.toFixed(2);
+            row.querySelector(".sale_price").textContent = sale.toFixed(2);
+
+            totalCost += cost;
+            totalSales += sale;
+        });
+
+        document.getElementById("totalCost").textContent = totalCost.toFixed(2);
+        document.getElementById("totalSales").textContent = totalSales.toFixed(2);
+    }
+
+    function saveItems() {
+        const rows = document.querySelectorAll("#itemRows tr");
+        const data = [];
+
+        rows.forEach(row => {
+            data.push({
+                product: row.querySelector('[name="product"]').value,
+                size: row.querySelector('[name="size"]').value,
+                quantity: parseInt(row.querySelector('[name="quantity"]').value),
+                unit_cost: parseFloat(row.querySelector('[name="unit_cost"]').value),
+                assembly_cost: parseFloat(row.querySelector('[name="assembly_cost"]').value),
+                profit_rate: parseFloat(row.querySelector('[name="profit_rate"]').value),
+                total_cost: parseFloat(row.querySelector(".total_cost").textContent),
+                sale_price: parseFloat(row.querySelector(".sale_price").textContent)
+            });
+        });
+
+        fetch(`/offer/{{ offer.id }}/save_items`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        }).then(res => res.json())
+          .then(resp => {
+              if (resp.status === 'success') {
+                  // Bootstrap toast notification
+                  const toastHtml = `
+                      <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                          <div class="d-flex">
+                              <div class="toast-body">
+                                  <i class="fas fa-check-circle me-2"></i>Teklif başarıyla kaydedildi!
+                              </div>
+                              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                          </div>
+                      </div>
+                  `;
+
+                  // Toast container yoksa oluştur
+                  let toastContainer = document.querySelector('.toast-container');
+                  if (!toastContainer) {
+                      toastContainer = document.createElement('div');
+                      toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                      document.body.appendChild(toastContainer);
+                  }
+
+                  // Toast'ı ekle ve göster
+                  toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                  const toastElement = toastContainer.lastElementChild;
+                  const toast = new bootstrap.Toast(toastElement);
+                  toast.show();
+
+                  // Toast'ı gösterdikten sonra DOM'dan kaldır
+                  toastElement.addEventListener('hidden.bs.toast', () => {
+                      toastElement.remove();
+                  });
+              }
+          })
+          .catch(error => {
+              console.error('Hata:', error);
+              alert('Kaydetme sırasında bir hata oluştu.');
+          });
+    }
+
+    window.onload = () => {
+        for (let i = 0; i < 3; i++) addRow();
+    };
+</script>
+{% endblock %}

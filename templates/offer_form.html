@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Yeni Teklif Oluştur{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="page-title mb-0">Yeni Teklif Oluştur</h2>
+            <p class="text-muted mb-0">Müşteri bilgilerini girin ve teklif oluşturmaya başlayın</p>
+        </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="custom-card">
+                <div class="custom-card-header">
+                    <h5 class="mb-0 d-flex align-items-center">
+                        <i class="fas fa-user-circle me-2 text-primary"></i>
+                        Müşteri Bilgileri
+                    </h5>
+                </div>
+                <div class="custom-card-body">
+                    <form method="POST" class="needs-validation" novalidate>
+                        <div class="row g-4">
+                            <!-- Customer Name -->
+                            <div class="col-md-6">
+                                <label for="customer_name" class="form-label fw-semibold">
+                                    Müşteri Adı <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user text-muted"></i>
+                                    </span>
+                                    <input type="text" name="customer_name" id="customer_name"
+                                           class="form-control" autocomplete="off"
+                                           placeholder="Müşteri adını yazın..." required>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Lütfen müşteri adını giriniz.
+                                </div>
+                                <div id="suggestions" class="list-group position-absolute w-100 shadow-sm" style="z-index: 999;"></div>
+                            </div>
+
+                            <!-- Phone Number -->
+                            <div class="col-md-6">
+                                <label for="visible_phone" class="form-label fw-semibold">
+                                    Telefon Numarası <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-phone text-muted"></i>
+                                    </span>
+                                    <input type="tel" name="customer_phone" id="visible_phone"
+                                           class="form-control" placeholder="(0xxx) xxx xx xx" required>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Lütfen telefon numarasını giriniz.
+                                </div>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="col-12">
+                                <label for="visible_address" class="form-label fw-semibold">
+                                    Müşteri Adresi <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text align-items-start pt-2">
+                                        <i class="fas fa-map-marker-alt text-muted"></i>
+                                    </span>
+                                    <textarea name="customer_address" id="visible_address"
+                                             class="form-control" rows="3"
+                                             placeholder="Müşteri adresini giriniz..." required></textarea>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Lütfen müşteri adresini giriniz.
+                                </div>
+                            </div>
+
+                            <!-- Valid Until -->
+                            <div class="col-md-6">
+                                <label for="valid_until" class="form-label fw-semibold">
+                                    Teklif Geçerlilik Tarihi <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-calendar-alt text-muted"></i>
+                                    </span>
+                                    <input type="date" name="valid_until" id="valid_until"
+                                           class="form-control" required>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Lütfen geçerlilik tarihini seçiniz.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-flex justify-content-between align-items-center mt-5">
+                            <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Geri
+                            </button>
+                            <button type="submit" class="btn btn-primary px-4">
+                                Devam Et
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Customer search suggestions
+document.getElementById("customer_name").addEventListener("input", function () {
+    const query = this.value;
+    const suggestions = document.getElementById("suggestions");
+
+    if (query.length < 2) {
+        suggestions.innerHTML = "";
+        return;
+    }
+
+    fetch(`/api/customers?q=${query}`)
+        .then(res => res.json())
+        .then(data => {
+            suggestions.innerHTML = "";
+
+            if (data.length === 0) {
+                const item = document.createElement("div");
+                item.className = "list-group-item text-muted";
+                item.textContent = "Sonuç bulunamadı";
+                suggestions.appendChild(item);
+                return;
+            }
+
+            data.forEach(customer => {
+                const item = document.createElement("button");
+                item.type = "button";
+                item.className = "list-group-item list-group-item-action d-flex align-items-start py-3";
+
+                const content = document.createElement("div");
+                const nameDiv = document.createElement("div");
+                nameDiv.className = "fw-semibold";
+                nameDiv.textContent = customer.name;
+
+                const infoDiv = document.createElement("div");
+                infoDiv.className = "text-muted small mt-1";
+                infoDiv.textContent = `${customer.phone || 'Telefon yok'} - ${customer.address?.substring(0,30) || 'Adres yok'}...`;
+
+                content.appendChild(nameDiv);
+                content.appendChild(infoDiv);
+                item.appendChild(content);
+
+                item.onclick = () => {
+                    document.getElementById("customer_name").value = customer.name;
+                    document.getElementById("visible_address").value = customer.address || '';
+                    document.getElementById("visible_phone").value = customer.phone || '';
+                    suggestions.innerHTML = "";
+                };
+                suggestions.appendChild(item);
+            });
+        })
+        .catch(error => {
+            console.error('Hata:', error);
+            suggestions.innerHTML = '<div class="list-group-item text-danger">Hata oluştu</div>';
+        });
+});
+
+// Phone number formatting
+document.getElementById("visible_phone").addEventListener("input", function (e) {
+    let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+    e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? ' ' + x[3] : '') + (x[4] ? ' ' + x[4] : '');
+});
+
+// Set default date to 30 days from now
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const futureDate = new Date(today.getTime() + (30 * 24 * 60 * 60 * 1000));
+    const dateString = futureDate.toISOString().split('T')[0];
+    document.getElementById('valid_until').value = dateString;
+});
+
+// Close suggestions when clicking outside
+document.addEventListener('click', function(e) {
+    const input = document.getElementById('customer_name');
+    const suggestions = document.getElementById('suggestions');
+
+    if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+        suggestions.innerHTML = '';
+    }
+});
+</script>
+{% endblock %}

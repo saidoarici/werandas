@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Tüm Teklifler{% endblock %}
+
+{% block content %}
+<div class="mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">📁 Teklif Listesi</h3>
+        <a href="{{ url_for('new_offer') }}" class="btn btn-primary">+ Yeni Teklif Oluştur</a>
+    </div>
+
+    {% if offers %}
+    <div class="table-responsive">
+        <table class="table table-bordered text-center align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Teklif No</th>
+                    <th>Müşteri</th>
+                    <th>Oluşturulma</th>
+                    <th>Geçerlilik</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for offer in offers %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ offer.offer_number }}</td>
+                    <td>{{ offer.customer.name }}</td>
+                    <td>{{ offer.created_at.strftime('%d.%m.%Y') }}</td>
+                    <td>{{ offer.valid_until.strftime('%d.%m.%Y') }}</td>
+                    <td>
+                        <a href="{{ url_for('add_items', offer_id=offer.id) }}" class="btn btn-sm btn-outline-warning">📝 Düzenle</a>
+                        <a href="{{ url_for('offer_pdf', offer_id=offer.id) }}" class="btn btn-sm btn-outline-danger">⬇️ PDF</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-info">Henüz kayıtlı bir teklif bulunmamaktadır.</div>
+    {% endif %}
+</div>
+{% endblock %}

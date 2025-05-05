@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Werandas Kış Bahçesi - Teklif</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
+
+    html, body {
+        font-family: 'Inter', sans-serif;
+        color: #1a1a1a;
+        line-height: 1.35;
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+
+    .page {
+        width: 100%;
+        min-height: 100vh;
+        padding: 8px 16px;
+        margin: 0 auto;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Header Styles */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 3px solid #1C3D5A;
+    }
+
+    .company-details {
+        flex: 1;
+    }
+
+    .company-name {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1C3D5A;
+        margin-bottom: 3px;
+        letter-spacing: -0.25px;
+    }
+
+    .company-tagline {
+        font-size: 11px;
+        color: #475569;
+        margin-bottom: 6px;
+    }
+
+    .contact-info {
+        font-size: 9px;
+        color: #334155;
+        line-height: 1.4;
+    }
+
+    .contact-row {
+        margin-bottom: 3px;
+    }
+
+    .logo-section {
+        flex: 0 0 65px;
+        text-align: right;
+    }
+
+    .logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        background-color: #1C3D5A;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .logo-text {
+        color: white;
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    /* Quote Header */
+    .quote-header {
+        background: linear-gradient(135deg, #1C3D5A 0%, #2C5282 100%);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 6px rgba(28,61,90,0.1);
+    }
+
+    .quote-title {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .quote-number {
+        font-size: 11px;
+        opacity: 0.9;
+    }
+
+    /* Client Details */
+    .client-section {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .detail-group {
+        background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .section-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: #1C3D5A;
+        text-transform: uppercase;
+        border-bottom: 1px solid #cbd5e1;
+        margin-bottom: 5px;
+        padding-bottom: 4px;
+    }
+
+    .detail-item {
+        font-size: 10px;
+        color: #1a1a1a;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        color: #475569;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    /* Table Styles */
+    .table-container {
+        margin: 10px 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        font-size: 10px;
+    }
+
+    th, td {
+        border: 1px solid #e5e7eb;
+        padding: 6px 8px;
+    }
+
+    th {
+        background-color: #1C3D5A;
+        color: white;
+        font-weight: 600;
+        text-align: left;
+        font-size: 10px;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    tbody tr:hover {
+        background-color: #eef2f7;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    /* Summary Section */
+    .summary-container {
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .summary-section {
+        min-width: 300px;
+        background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 8px 12px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 3px 0;
+        font-size: 11px;
+    }
+
+    .summary-row.total {
+        font-weight: 700;
+        color: #1C3D5A;
+        border-top: 2px solid #1C3D5A;
+        padding-top: 5px;
+        margin-top: 5px;
+        font-size: 12px;
+    }
+
+    /* Info Section */
+    .info-section {
+        margin: 10px 0;
+    }
+
+    .info-box {
+        background: linear-gradient(to right, #FEF3C7, #FEFCE8);
+        border-left: 4px solid #F59E0B;
+        padding: 8px 12px;
+        font-size: 10px;
+        color: #92400E;
+        margin-bottom: 6px;
+        border-radius: 0 6px 6px 0;
+    }
+
+    .info-box strong {
+        color: #78350F;
+    }
+
+    /* Terms Section */
+    .terms-section {
+        margin-top: 8px;
+        padding-top: 10px;
+        border-top: 2px dashed #e5e7eb;
+    }
+
+    .terms-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #1C3D5A;
+        margin-bottom: 8px;
+    }
+
+    .terms-content {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .term-item {
+        font-size: 9px;
+        color: #475569;
+        margin-bottom: 4px;
+        padding-left: 12px;
+        position: relative;
+    }
+
+    .term-item::before {
+        content: "•";
+        color: #1C3D5A;
+        position: absolute;
+        left: 0;
+    }
+
+    /* Signature Section */
+    .signature-section {
+        margin-top: 12px;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .signature-box {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        text-align: center;
+        background: #f9fafb;
+    }
+
+    .signature-line {
+        font-size: 10px;
+        color: #475569;
+        margin-top: 25px;
+        border-top: 1px dashed #94a3b8;
+        padding-top: 6px;
+    }
+
+    /* Footer */
+    .footer {
+        text-align: center;
+        font-size: 8px;
+        color: #64748b;
+        margin-top: auto;
+        padding-top: 10px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    @media print {
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .quote-header,
+        th {
+            background: #1C3D5A !important;
+            color: white !important;
+        }
+
+        .page {
+            box-shadow: none;
+        }
+
+        .detail-group,
+        .summary-section {
+            background: white !important;
+        }
+    }
+</style>
+</head>
+<body>
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-details">
+                <h1 class="company-name">WERANDAS KIŞ BAHÇESİ</h1>
+                <p class="company-tagline">Kış Bahçesi ve Pergola Sistemleri Uzmanı</p>
+                <div class="contact-info">
+                    <p class="contact-row">📍 Hürriyet Mah. Adnan Kahveci Cad. NO: 93 A KARTAL / İSTANBUL</p>
+                    <p class="contact-row">📞 +90 540 585 34 34  •  📧 info@werandas.com  •  🌐 www.werandas.com</p>
+                </div>
+            </div>
+            <div class="logo-section">
+                <div class="logo">
+                    <div class="logo-text">W</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quote Header -->
+        <div class="quote-header">
+            <div>
+                <h2 class="quote-title">TEKLİF BELGESİ</h2>
+                <p class="quote-number">Teklif No: {{ offer.offer_number }}</p>
+            </div>
+            <div class="quote-date">
+                <div class="quote-number">Tarih: {{ offer.created_at.strftime('%d.%m.%Y') }}</div>
+            </div>
+        </div>
+
+        <!-- Client Details -->
+        <div class="client-section">
+            <div class="detail-group">
+                <h3 class="section-label">Müşteri Bilgileri</h3>
+                <div class="detail-item">
+                    <div class="detail-label">Müşteri:</div>
+                    <div class="detail-value">{{ offer.customer.name }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Adres:</div>
+                    <div class="detail-value">{{ offer.customer.address }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Telefon:</div>
+                    <div class="detail-value">{{ offer.customer.phone }}</div>
+                </div>
+            </div>
+            <div class="detail-group">
+                <h3 class="section-label">Teklif Detayları</h3>
+                <div class="detail-item">
+                    <div class="detail-label">Hazırlayan:</div>
+                    <div class="detail-value">{{ offer.created_by }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Geçerlilik:</div>
+                    <div class="detail-value">30 Gün</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Teslim:</div>
+                    <div class="detail-value">10-15 İş Günü</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="text-center" width="5%">No</th>
+                        <th width="35%">Ürün Açıklaması</th>
+                        <th class="text-center" width="12%">Ölçü</th>
+                        <th class="text-center" width="8%">Adet</th>
+                        <th class="text-center" width="10%">Alan (m²)</th>
+                        <th class="text-right" width="15%">Birim Fiyat</th>
+                        <th class="text-right" width="15%">Toplam Fiyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set total = 0 %}
+                    {% for item in offer.items %}
+                        {% set total = total + item.total_cost %}
+                        <tr>
+                            <td class="text-center">{{ loop.index }}</td>
+                            <td>{{ item.product }}</td>
+                            <td class="text-center">{{ item.size }}</td>
+                            <td class="text-center">{{ item.quantity }}</td>
+                            <td class="text-center">{{ "%.2f"|format(item.quantity * 1) }}</td>
+                            <td class="text-right">₺ {{ "%.2f"|format(item.unit_cost + item.assembly_cost) }}</td>
+                            <td class="text-right">₺ {{ "%.2f"|format(item.total_cost) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-container">
+            <div class="summary-section">
+                <div class="summary-row">
+                    <span class="summary-label">Ara Toplam:</span>
+                    <span class="summary-value">₺ {{ "%.2f"|format(total) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">KDV (%20):</span>
+                    <span class="summary-value">₺ {{ "%.2f"|format(total * 0.20) }}</span>
+                </div>
+                <div class="summary-row total">
+                    <span class="summary-label">GENEL TOPLAM:</span>
+                    <span class="summary-value">₺ {{ "%.2f"|format(total * 1.20) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Boxes -->
+        <div class="info-section">
+            <div class="info-box">
+                <p><strong>Teslimat & Montaj:</strong> Teslimat süresi 10-15 iş günüdür. Saha incelemesi yapılarak montaj planlanacaktır.</p>
+            </div>
+            <div class="info-box">
+                <p><strong>Kapsam:</strong> Fiyatlarımıza köpük dahildir. Bioclimatic sistemlerde Mosel motor kullanılmaktadır.</p>
+            </div>
+        </div>
+
+        <!-- Terms Section -->
+        <div class="terms-section">
+            <h3 class="terms-title">Şartlar ve Koşullar</h3>
+            <div class="terms-content">
+                <div>
+                    <div class="term-item">Teklif 30 gün boyunca geçerlidir.</div>
+                    <div class="term-item">Fiyatlar TL cinsinden KDV dahildir.</div>
+                    <div class="term-item">Ödeme: %30 avans, %70 teslimde.</div>
+                    <div class="term-item">5 yıl fabrika garantisi verilir.</div>
+                </div>
+                <div>
+                    <div class="term-item">Tüm ürünler CE belgeli ve kalitelidir.</div>
+                    <div class="term-item">Saha ölçüsü ve montaj dahildir.</div>
+                    <div class="term-item">İyi işçilik garantisi verilir.</div>
+                    <div class="term-item">Müşteri memnuniyeti önceliğimizdir.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div class="signature-box">
+                <div class="signature-line">Müşteri Adı ve İmzası</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line">Werandas Yetkilisi</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Bu teklif sadece belirtilen proje için geçerlidir. Werandas Kış Bahçesi - Tüm hakları saklıdır.</p>
+        </div>
+    </div>
+</body>
+</html>
