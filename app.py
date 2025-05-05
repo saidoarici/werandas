@@ -25,10 +25,6 @@ try:
 except ImportError:
     generate_pdf = None
 
-@app.route('/')
-def home():
-    return redirect(url_for('new_offer'))
-
 @app.route('/offer/new', methods=['GET', 'POST'])
 def new_offer():
     if request.method == 'POST':
@@ -39,7 +35,8 @@ def new_offer():
             customer = Customer(
                 name=customer_name,
                 address=request.form.get('customer_address'),
-                phone=request.form.get('customer_phone')
+                phone=request.form.get('customer_phone'),
+                email=request.form.get('customer_email')  # <<-- yeni alan
             )
             db.session.add(customer)
             db.session.commit()
@@ -49,7 +46,8 @@ def new_offer():
             customer_id=customer.id,
             created_by="admin",
             created_at=datetime.now(),
-            valid_until=datetime.strptime(request.form['valid_until'], '%Y-%m-%d')
+            valid_until=datetime.strptime(request.form['valid_until'], '%Y-%m-%d'),
+            currency=request.form.get('currency')  # <<-- yeni alan
         )
         db.session.add(offer)
         db.session.commit()
@@ -59,11 +57,31 @@ def new_offer():
 @app.route('/offer/<int:offer_id>/items', methods=['GET'])
 def add_items(offer_id):
     offer = Offer.query.get_or_404(offer_id)
-    return render_template('offer_items.html', offer_id=offer_id, offer=offer)
+    offer_items = OfferItem.query.filter_by(offer_id=offer_id).all()
+
+    # OfferItem'ları JSON'a uygun hale getir
+    items = [{
+        'product': i.product,
+        'size': i.size,
+        'quantity': i.quantity,
+        'unit_cost': i.unit_cost,
+        'assembly_cost': i.assembly_cost,
+        'profit_rate': i.profit_rate,
+        'total_cost': i.total_cost,
+        'sale_price': i.sale_price
+    } for i in offer_items]
+
+    return render_template('offer_items.html', offer=offer, items=items, currency=offer.currency)
 
 @app.route('/offer/<int:offer_id>/save_items', methods=['POST'])
 def save_items(offer_id):
     data = request.get_json()
+
+    # 1. Önce mevcut kayıtları sil
+    OfferItem.query.filter_by(offer_id=offer_id).delete()
+    db.session.commit()
+
+    # 2. Yeni gelenleri ekle
     for item in data:
         db.session.add(OfferItem(
             offer_id=offer_id,
@@ -137,6 +155,36 @@ def api_products():
         'default_profit_rate': p.default_profit_rate
     } for p in results]
 
+
+@app.route('/')
+def home():
+    # İstatistikleri hesapla
+    offers_count = Offer.query.count()
+    customers_count = Customer.query.count()
+    products_count = Product.query.count()
+
+    # Bu ayki teklifleri hesapla
+    from datetime import datetime, date
+    today = date.today()
+    first_day = date(today.year, today.month, 1)
+    this_month_offers = Offer.query.filter(
+        Offer.created_at >= first_day,
+        Offer.created_at <= today
+    ).count()
+
+    # Son 5 teklifi getir
+    recent_offers = Offer.query.order_by(Offer.created_at.desc()).limit(5).all()
+
+    # Son 5 müşteriyi getir
+    recent_customers = Customer.query.order_by(Customer.id.desc()).limit(5).all()
+
+    return render_template('index.html',
+                           offers_count=offers_count,
+                           customers_count=customers_count,
+                           products_count=products_count,
+                           this_month_offers=this_month_offers,
+                           recent_offers=recent_offers,
+                           recent_customers=recent_customers)
 
 @app.context_processor
 def inject_now():

@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Anasayfa - Teklif Yönetim Sistemi{% endblock %}
+
+{% block head %}
+<style>
+    /* Anasayfa'ya özel stiller */
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 4rem 1rem;  /* Container kaldırıldığı için padding güncelledik */
+        margin-bottom: 2rem;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--secondary-color);
+    }
+
+    .recent-offers {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .action-button {
+        display: inline-block;
+        padding: 1rem 2rem;
+        margin: 0.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .btn-new-offer {
+        background-color: var(--accent-color);
+    }
+
+    .btn-new-offer:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(231,76,60,0.2);
+    }
+
+    .btn-view-offers {
+        background-color: var(--secondary-color);
+        border: none;
+    }
+
+    .btn-view-offers:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(52,152,219,0.2);
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+    }
+
+    /* İçerik için maksimum genişlik (opsiyonel) */
+    .content-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="content-wrapper text-center">  <!-- Container yerine content-wrapper -->
+        <h1 class="display-4 mb-4">Teklif Yönetim Sistemi</h1>
+        <p class="lead mb-4">Tekliflerinizi kolayca oluşturun, yönetin ve takip edin</p>
+        <a href="{{ url_for('new_offer') }}" class="action-button btn-new-offer">
+            <i class="fas fa-plus me-2"></i>Yeni Teklif Oluştur
+        </a>
+        <a href="{{ url_for('list_offers') }}" class="action-button btn-view-offers">
+            <i class="fas fa-eye me-2"></i>Teklifleri Görüntüle
+        </a>
+    </div>
+</div>
+
+<div class="content-wrapper">  <!-- Container yerine content-wrapper -->
+    <div class="row mb-5">
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <i class="fas fa-file-invoice feature-icon"></i>
+                <div class="stats-number">{{ offers_count }}</div>
+                <h4>Toplam Teklif</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <i class="fas fa-users feature-icon"></i>
+                <div class="stats-number">{{ customers_count }}</div>
+                <h4>Toplam Müşteri</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <i class="fas fa-box-open feature-icon"></i>
+                <div class="stats-number">{{ products_count }}</div>
+                <h4>Toplam Ürün</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <i class="fas fa-calendar-check feature-icon"></i>
+                <div class="stats-number">{{ this_month_offers }}</div>
+                <h4>Bu Ay</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="recent-offers">
+                <h3 class="mb-4">Son Teklifler</h3>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Teklif No</th>
+                            <th>Müşteri</th>
+                            <th>Tarih</th>
+                            <th>Toplam</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for offer in recent_offers %}
+                        <tr>
+                            <td>{{ offer.offer_number }}</td>
+                            <td>{{ offer.customer.name }}</td>
+                            <td>{{ offer.created_at.strftime('%d.%m.%Y') }}</td>
+                            <td>
+                                {{ '{:,.2f}'.format(offer.total_cost) }} {{ offer.currency }}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('add_items', offer_id=offer.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>Görüntüle
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">
+                                Henüz teklif bulunmuyor
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="recent-offers">
+                <h3 class="mb-4">Hızlı İşlemler</h3>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('new_offer') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle me-2"></i>Yeni Teklif
+                    </a>
+                    <a href="{{ url_for('new_product') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-box me-2"></i>Yeni Ürün Ekle
+                    </a>
+                    <a href="{{ url_for('list_products') }}" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-list me-2"></i>Ürün Listesi
+                    </a>
+                </div>
+                
+                <div class="mt-4">
+                    <h5>Son Müşteriler</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for customer in recent_customers %}
+                        <li class="list-group-item">
+                            <i class="fas fa-user me-2"></i>{{ customer.name }}
+                            <small class="text-muted ms-2">{{ customer.phone }}</small>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-muted">
+                            Henüz müşteri bulunmuyor
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

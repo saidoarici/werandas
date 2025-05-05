@@ -34,6 +34,35 @@
     .table-responsive {
         -webkit-overflow-scrolling: touch;
     }
+
+    .btn-delete {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+    color: #fff;
+    background-color: #dc3545;
+    border-radius: 0.25rem;
+}
+
+.btn-delete:active {
+    transform: scale(0.98);
+}
+
+.btn-delete i {
+    font-size: 1rem;
+}
+
+/* Para birimi simgesi stili */
+.currency-symbol {
+    font-weight: bold;
+    color: #495057;
+}
 </style>
 {% endblock %}
 
@@ -93,6 +122,15 @@
                         </div>
                         <div class="col-md-3">
                             <div class="customer-info-item">
+                                <label class="fw-semibold text-muted d-block mb-1">E-posta</label>
+                                <p class="mb-0 d-flex align-items-center">
+                                    <i class="fas fa-envelope me-2 text-secondary"></i>
+                                    {{ offer.customer.email }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="customer-info-item">
                                 <label class="fw-semibold text-muted d-block mb-1">Geçerlilik Tarihi</label>
                                 <p class="mb-0 d-flex align-items-center">
                                     <i class="fas fa-calendar-alt me-2 text-secondary"></i>
@@ -100,12 +138,22 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-6">
                             <div class="customer-info-item">
                                 <label class="fw-semibold text-muted d-block mb-1">Adres</label>
                                 <p class="mb-0 d-flex align-items-start">
                                     <i class="fas fa-map-marker-alt me-2 text-secondary mt-1"></i>
                                     <span>{{ offer.customer.address }}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="customer-info-item">
+                                <label class="fw-semibold text-muted d-block mb-1">Para Birimi</label>
+                                <p class="mb-0 d-flex align-items-center">
+                                    <i class="fas fa-money-bill-wave me-2 text-secondary"></i>
+                                    <span class="currency-symbol">{{ currency }}</span>
+                                    <span class="ms-2">({{ offer.currency }})</span>
                                 </p>
                             </div>
                         </div>
@@ -143,18 +191,23 @@
                                         <th width="120" style="min-width: 120px;">Toplam</th>
                                         <th width="80" style="min-width: 80px;">Kâr %</th>
                                         <th width="120" style="min-width: 120px;">Karlı Satış</th>
+                                        <th width="60" style="min-width: 60px;">İşlem</th>
                                     </tr>
                                 </thead>
                                 <tbody id="itemRows">
                                     <!-- Dinamik ürün satırları -->
                                 </tbody>
                                 <tfoot>
-                                    <tr class="table-secondary">
-                                        <td colspan="6" class="text-end fw-bold">Toplam:</td>
-                                        <td id="totalCost" class="fw-bold">0</td>
-                                        <td></td>
-                                        <td id="totalSales" class="fw-bold">0</td>
-                                    </tr>
+                                <tr class="table-secondary">
+                                    <td colspan="3" class="text-end fw-bold">Toplam:</td>
+                                    <td id="totalQuantity" class="fw-bold">0</td>
+                                    <td id="totalUnitCost" class="fw-bold currency-symbol"></td>
+                                    <td id="totalAssembly" class="fw-bold currency-symbol"></td>
+                                    <td id="totalCost" class="fw-bold currency-symbol"></td>
+                                    <td></td>
+                                    <td id="totalSales" class="fw-bold currency-symbol"></td>
+                                    <td></td>
+                                </tr>
                                 </tfoot>
                             </table>
                         </div>
@@ -176,32 +229,81 @@
 <script>
     let rowCount = 0;
 
-    function addRow() {
-        rowCount++;
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td class="text-center text-secondary fw-bold">${rowCount}</td>
-            <td class="position-relative">
-                <input type="text" class="form-control form-control-sm product-search" name="product"
-                       placeholder="Ürün ara..." autocomplete="off" style="font-size: 0.9rem;">
-                <div class="list-group position-absolute w-100 shadow-sm" style="z-index: 999;"></div>
-            </td>
-            <td><input type="text" class="form-control form-control-sm" name="size" placeholder="Ölçü" style="font-size: 0.9rem;"></td>
-            <td><input type="number" class="form-control form-control-sm" name="quantity" value="1"
-                       onchange="calculate()" min="1" style="font-size: 0.9rem;"></td>
-            <td><input type="number" class="form-control form-control-sm" name="unit_cost" value="0"
-                       onchange="calculate()" step="0.01" min="0" style="font-size: 0.9rem;"></td>
-            <td><input type="number" class="form-control form-control-sm" name="assembly_cost" value="0"
-                       onchange="calculate()" step="0.01" min="0" style="font-size: 0.9rem;"></td>
-            <td class="total_cost fw-bold">0</td>
-            <td><input type="number" class="form-control form-control-sm" name="profit_rate" value="20"
-                       onchange="calculate()" min="0" style="font-size: 0.9rem;"></td>
-            <td class="sale_price fw-bold">0</td>
-        `;
-        document.getElementById("itemRows").appendChild(row);
-        setupSearch(row.querySelector(".product-search"));
+    function addRow(data = {}) {
+    rowCount++;
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td class="text-center text-secondary fw-bold">${rowCount}</td>
+        <td class="position-relative">
+            <input type="text" class="form-control form-control-sm product-search" name="product"
+                   placeholder="Ürün ara..." autocomplete="off" value="${data.product || ''}" style="font-size: 0.9rem;">
+            <div class="list-group position-absolute w-100 shadow-sm" style="z-index: 999;"></div>
+        </td>
+        <td><input type="text" class="form-control form-control-sm" name="size" placeholder="Ölçü" value="${data.size || ''}" style="font-size: 0.9rem;"></td>
+        <td><input type="number" class="form-control form-control-sm" name="quantity" value="${data.quantity || 1}"
+                   onchange="calculate()" min="1" style="font-size: 0.9rem;"></td>
+        <td>
+            <div class="d-flex align-items-center">
+                <span class="currency-symbol me-1">${currency}</span>
+                <input type="number" class="form-control form-control-sm" name="unit_cost" value="${data.unit_cost || 0}"
+                       onchange="calculate()" step="0.01" min="0" style="font-size: 0.9rem;">
+            </div>
+        </td>
+        <td>
+            <div class="d-flex align-items-center">
+                <span class="currency-symbol me-1">${currency}</span>
+                <input type="number" class="form-control form-control-sm" name="assembly_cost" value="${data.assembly_cost || 0}"
+                       onchange="calculate()" step="0.01" min="0" style="font-size: 0.9rem;">
+            </div>
+        </td>
+        <td>
+            <div class="d-flex align-items-center">
+                <span class="currency-symbol me-2">${currency}</span>
+                <span class="total_cost fw-bold">${(data.total_cost || 0).toFixed(2)}</span>
+            </div>
+        </td>
+        <td><input type="number" class="form-control form-control-sm" name="profit_rate" value="${data.profit_rate || 20}"
+                   onchange="calculate()" min="0" style="font-size: 0.9rem;"></td>
+        <td>
+            <div class="d-flex align-items-center">
+                <span class="currency-symbol me-2">${currency}</span>
+                <span class="sale_price fw-bold">${(data.sale_price || 0).toFixed(2)}</span>
+            </div>
+        </td>
+        <td class="text-center">
+            <button type="button" class="btn-delete" onclick="deleteRow(this)" title="Satırı Sil">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </td>
+    `;
+    document.getElementById("itemRows").appendChild(row);
+    setupSearch(row.querySelector(".product-search"));
+    updateRowNumbers();
+    calculate();
+}
+
+function deleteRow(button) {
+    const row = button.closest('tr');
+
+    // Silme animasyonu ile
+    row.style.transition = 'all 0.3s ease';
+    row.style.backgroundColor = '#ffecec';
+
+    setTimeout(() => {
+        row.remove();
+        updateRowNumbers();
         calculate();
-    }
+    }, 300);
+}
+
+function updateRowNumbers() {
+    const rows = document.querySelectorAll("#itemRows tr");
+    rows.forEach((row, index) => {
+        const numberCell = row.querySelector('td:first-child');
+        numberCell.textContent = index + 1;
+    });
+    rowCount = rows.length;
+}
 
     function setupSearch(input) {
         const container = input.parentElement.querySelector(".list-group");
@@ -238,7 +340,7 @@
 
                         const infoDiv = document.createElement("div");
                         infoDiv.className = "text-muted small mt-1";
-                        infoDiv.textContent = `Ölçü: ${product.size} | Maliyet: ₺${product.unit_cost}`;
+                        infoDiv.textContent = `Ölçü: ${product.size} | Maliyet: ${currency}${product.unit_cost}`;
 
                         content.appendChild(nameDiv);
                         content.appendChild(infoDiv);
@@ -271,27 +373,34 @@
     }
 
     function calculate() {
-        let totalCost = 0, totalSales = 0;
+    let totalCost = 0, totalSales = 0;
+    let totalQuantity = 0, totalUnitCost = 0, totalAssembly = 0;
 
-        document.querySelectorAll("#itemRows tr").forEach(row => {
-            const adet = parseFloat(row.querySelector('[name="quantity"]').value) || 0;
-            const a = parseFloat(row.querySelector('[name="unit_cost"]').value) || 0;
-            const b = parseFloat(row.querySelector('[name="assembly_cost"]').value) || 0;
-            const k = parseFloat(row.querySelector('[name="profit_rate"]').value) || 0;
+    document.querySelectorAll("#itemRows tr").forEach(row => {
+        const adet = parseFloat(row.querySelector('[name="quantity"]').value) || 0;
+        const a = parseFloat(row.querySelector('[name="unit_cost"]').value) || 0;
+        const b = parseFloat(row.querySelector('[name="assembly_cost"]').value) || 0;
+        const k = parseFloat(row.querySelector('[name="profit_rate"]').value) || 0;
 
-            const cost = (a + b) * adet;
-            const sale = cost * (1 + k / 100);
+        const cost = (a + b) * adet;
+        const sale = cost * (1 + k / 100);
 
-            row.querySelector(".total_cost").textContent = cost.toFixed(2);
-            row.querySelector(".sale_price").textContent = sale.toFixed(2);
+        row.querySelector(".total_cost").textContent = cost.toFixed(2);
+        row.querySelector(".sale_price").textContent = sale.toFixed(2);
 
-            totalCost += cost;
-            totalSales += sale;
-        });
+        totalQuantity += adet;
+        totalUnitCost += a;
+        totalAssembly += b;
+        totalCost += cost;
+        totalSales += sale;
+    });
 
-        document.getElementById("totalCost").textContent = totalCost.toFixed(2);
-        document.getElementById("totalSales").textContent = totalSales.toFixed(2);
-    }
+    document.getElementById("totalQuantity").textContent = totalQuantity;
+    document.getElementById("totalUnitCost").textContent = currency + totalUnitCost.toFixed(2);
+    document.getElementById("totalAssembly").textContent = currency + totalAssembly.toFixed(2);
+    document.getElementById("totalCost").textContent = currency + totalCost.toFixed(2);
+    document.getElementById("totalSales").textContent = currency + totalSales.toFixed(2);
+}
 
     function saveItems() {
         const rows = document.querySelectorAll("#itemRows tr");
@@ -356,7 +465,26 @@
     }
 
     window.onload = () => {
+    if (existingItems.length > 0) {
+        existingItems.forEach(item => {
+            addRow(item);
+        });
+    } else {
         for (let i = 0; i < 3; i++) addRow();
-    };
+    }
+};
+</script>
+
+<script>
+    const existingItems = {{ items | tojson }};
+</script>
+
+<script>
+const currencySymbols = {
+    'TRY': '₺',
+    'USD': '$',
+    'EUR': '€'
+};
+const currency = currencySymbols["{{ currency }}"] || '₺';
 </script>
 {% endblock %}

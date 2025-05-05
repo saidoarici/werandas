@@ -23,6 +23,7 @@ class Offer(db.Model):
     created_by = db.Column(db.String(50))
     created_at = db.Column(db.DateTime)
     valid_until = db.Column(db.DateTime)
+    currency = db.Column(db.String(10))
 
     items = db.relationship('OfferItem', backref='offer', cascade="all, delete-orphan")
 
@@ -49,6 +50,7 @@ class Customer(db.Model):
     name = db.Column(db.String(100), unique=True)
     address = db.Column(db.String(200))
     phone = db.Column(db.String(30))
+    email = db.Column(db.String(100))
 
     # Bu ilişkiyi ancak Offer.customer_id foreign key olursa kurabiliriz
     offers = db.relationship("Offer", backref="customer", lazy=True)
