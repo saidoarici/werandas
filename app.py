@@ -5,7 +5,7 @@ from models import Offer, OfferItem, Customer, Product
 from datetime import datetime
 from io import BytesIO
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.secret_key = 'maliyet-super-secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///maliyet.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
