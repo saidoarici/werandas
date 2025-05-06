@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import Flask, render_template, request, redirect, url_for, send_file, send_from_directory
 from flask_migrate import Migrate
 from extensions import db
 from models import Offer, OfferItem, Customer, Product
@@ -192,6 +192,9 @@ def inject_now():
     return {'datetime': datetime}
 
 
+@app.route('/static/<path:filename>')
+def staticfiles(filename):
+    return send_from_directory(app.static_folder, filename)
 
 
 # Bu kısım sadece doğrudan python ile çalıştırıldığında çalışır
