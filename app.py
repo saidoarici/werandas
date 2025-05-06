@@ -192,7 +192,7 @@ def inject_now():
     return {'datetime': datetime}
 
 
-@app.route('/static/<path:filename>')
+@app.route('/<path:filename>')
 def staticfiles(filename):
     return send_from_directory(app.static_folder, filename)
 
